@@ -1,33 +1,41 @@
 phases:
 - name: "Phase 1 \u2013 Data Foundations"
-  status: in_progress
+  status: done
   tasks:
   - name: Inventory Inputs
     status: done
     notes: Initial demo dataset catalogued in docs/datasets.md.
   - name: Ingestion Pipeline Skeleton
-    status: in_progress
-    notes: DemoIngestor bootstrapped with awpy hooks; full parsing TBD.
+    status: done
+    notes: DemoIngestor wired with awpy parsing, metadata, manifests
   - name: Storage Layout Definition
     status: done
     notes: Processed layout helpers and tests added
   - name: Indexing & Metadata Strategy
     status: todo
+  notes: Demo discovery, parsing skeleton, storage layout complete
 - name: "Phase 2 \u2013 Metric Computation Modules"
-  status: todo
+  status: in_progress
   tasks:
   - name: Module Skeleton
-    status: todo
+    status: done
+    notes: Metrics package scaffolded with pacing module
   - name: Pacing Metrics
-    status: todo
+    status: done
+    notes: Implemented TTFK, bomb plant, average death metrics with tests
   - name: Aggression Metrics
-    status: todo
+    status: done
+    notes: Implemented distance to site, CT presence, player spacing with tests
   - name: Rotational Efficiency
     status: todo
   - name: Execute & Retake Metrics
     status: todo
   - name: Utility Metrics
     status: todo
+  - name: "Aggression Metrics \u2013 Data Requirements"
+    status: done
+    notes: Assumed zone distance table and chokepoint feed for metrics
+  notes: Designing metric modules, starting with pacing metrics
 - name: "Phase 3 \u2013 Visualization & Reporting"
   status: todo
   tasks:
