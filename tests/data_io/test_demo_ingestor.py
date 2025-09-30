@@ -65,9 +65,6 @@ def test_update_manifest_records_metadata(tmp_path: Path) -> None:
     source_root.mkdir()
 
     demo_path = touch_demo(source_root, "match.dem")
-    output_dir = processed_root / demo_path.stem
-    output_dir.mkdir(parents=True)
-
     config = DemoIngestionConfig(
         source_root=source_root,
         processed_root=processed_root,
@@ -80,17 +77,71 @@ def test_update_manifest_records_metadata(tmp_path: Path) -> None:
         "metadata": {"map": "inferno"},
     }
 
-    ingestor._update_manifest(demo_path, output_dir, parse_result)  # type: ignore[attr-defined]
+    table_names = ["events"]
+    ingestor._update_manifest(demo_path, parse_result, table_names)  # type: ignore[attr-defined]
 
     manifest_path = processed_root / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest[-1]["demo_name"] == "match.dem"
     assert manifest[-1]["total_rounds"] == 24
     assert manifest[-1]["parser"] == "awpy"
+    assert manifest[-1]["tables"] == ["events"]
+    assert manifest[-1]["metadata_file"].endswith("metadata.json")
 
     parse_result["total_rounds"] = 30
-    ingestor._update_manifest(demo_path, output_dir, parse_result)  # type: ignore[attr-defined]
+    ingestor._update_manifest(demo_path, parse_result, table_names)  # type: ignore[attr-defined]
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert len([entry for entry in manifest if entry["demo_stem"] == "match"]) == 1
     assert manifest[-1]["total_rounds"] == 30
+
+
+def test_write_metadata_dumps_non_table_entries(tmp_path: Path) -> None:
+    source_root = tmp_path / "raw"
+    processed_root = tmp_path / "processed"
+    source_root.mkdir()
+
+    demo_path = touch_demo(source_root, "match.dem")
+
+    config = DemoIngestionConfig(
+        source_root=source_root,
+        processed_root=processed_root,
+    )
+    ingestor = DemoIngestor(config)
+
+    parse_result = {
+        "events": _DummyTable({"tick": [1]}),
+        "total_rounds": 10,
+        "score": {"t": 6, "ct": 4},
+        "map": "nuke",
+    }
+
+    table_names = ["events"]
+    ingestor._write_metadata(demo_path.stem, parse_result, table_names)  # type: ignore[attr-defined]
+
+    metadata_path = processed_root / demo_path.stem / "metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+
+    assert metadata["total_rounds"] == 10
+    assert metadata["score"] == {"t": 6, "ct": 4}
+    assert metadata["map"] == "nuke"
+
+
+def test_layout_creates_tables_directory(tmp_path: Path) -> None:
+    source_root = tmp_path / "raw"
+    processed_root = tmp_path / "processed"
+    source_root.mkdir()
+
+    touch_demo(source_root, "game.dem")
+
+    config = DemoIngestionConfig(
+        source_root=source_root,
+        processed_root=processed_root,
+    )
+    ingestor = DemoIngestor(config)
+
+    table_path = ingestor._layout.table_path("game", "events")  # type: ignore[attr-defined]
+
+    assert table_path.parent.name == "tables"
+    assert table_path.parent.exists()
+    assert table_path.parent.parent == processed_root / "game"

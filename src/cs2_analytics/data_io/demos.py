@@ -44,6 +44,38 @@ class DemoIngestionConfig:
             self.processed_root.mkdir(parents=True, exist_ok=True)
 
 
+@dataclass(frozen=True)
+class ProcessedLayout:
+    """Helpers for managing processed dataset structure."""
+
+    root: Path
+    tables_dirname: str = "tables"
+    metadata_filename: str = "metadata.json"
+    manifest_filename: str = "manifest.json"
+
+    def ensure_root(self) -> None:
+        self.root.mkdir(parents=True, exist_ok=True)
+
+    def demo_dir(self, demo_stem: str) -> Path:
+        path = self.root / demo_stem
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def tables_dir(self, demo_stem: str) -> Path:
+        path = self.demo_dir(demo_stem) / self.tables_dirname
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def table_path(self, demo_stem: str, table_name: str) -> Path:
+        return self.tables_dir(demo_stem) / f"{table_name}.parquet"
+
+    def metadata_path(self, demo_stem: str) -> Path:
+        return self.demo_dir(demo_stem) / self.metadata_filename
+
+    def manifest_path(self) -> Path:
+        return self.root / self.manifest_filename
+
+
 class DemoIngestor:
     """High-level orchestrator for CS2 demo ingestion."""
 
@@ -51,6 +83,8 @@ class DemoIngestor:
         self._config = config
         self._config.validate()
         self._logger = logging.getLogger(self.__class__.__name__)
+        self._layout = ProcessedLayout(config.processed_root)
+        self._layout.ensure_root()
 
     def iter_demo_files(self) -> Iterator[Path]:
         """Yield paths to all tracked demo files under ``source_root``."""
@@ -106,8 +140,7 @@ class DemoIngestor:
                 "awpy is required to parse demos. Install with `poetry add awpy`."
             )
 
-        output_dir = self._config.processed_root / demo_path.stem
-        output_dir.mkdir(parents=True, exist_ok=True)
+        demo_dir = self._layout.demo_dir(demo_path.stem)
 
         self._logger.info("Parsing demo: %s", demo_path.name)
         try:
@@ -121,10 +154,11 @@ class DemoIngestor:
         except Exception as exc:  # pragma: no cover - underlying parser failure
             raise RuntimeError(f"Parser failed for {demo_path.name}") from exc
 
-        self._persist_parse_result(output_dir, parse_result)
-        self._update_manifest(demo_path, output_dir, parse_result)
+        table_names = self._persist_parse_result(demo_path.stem, parse_result)
+        self._write_metadata(demo_path.stem, parse_result, table_names)
+        self._update_manifest(demo_path, parse_result, table_names)
 
-    def _persist_parse_result(self, output_dir: Path, parse_result: dict) -> None:
+    def _persist_parse_result(self, demo_stem: str, parse_result: dict) -> list[str]:
         """Persist parsed data frames as columnar files."""
 
         try:
@@ -134,37 +168,56 @@ class DemoIngestor:
                 "polars is required to persist parsed data. Install with `poetry add polars`."
             ) from exc
 
-        tables = {}
+        tables: dict[str, "pl.DataFrame"] = {}
         for key, value in parse_result.items():
             if hasattr(value, "to_dict"):
                 tables[key] = pl.DataFrame(value)
-            elif isinstance(value, dict):
-                tables[key] = pl.DataFrame([value])
 
+        written_tables: list[str] = []
         for name, frame in tables.items():
-            frame.write_parquet(output_dir / f"{name}.parquet")
+            path = self._layout.table_path(demo_stem, name)
+            frame.write_parquet(path)
+            written_tables.append(name)
+
+        return written_tables
+
+    def _write_metadata(
+        self,
+        demo_stem: str,
+        parse_result: dict,
+        table_names: list[str],
+    ) -> None:
+        metadata = {
+            key: value
+            for key, value in parse_result.items()
+            if key not in table_names
+        }
+
+        metadata_path = self._layout.metadata_path(demo_stem)
+        metadata_path.write_text(
+            json.dumps(metadata, indent=2, default=str),
+            encoding="utf-8",
+        )
 
     def _update_manifest(
         self,
         demo_path: Path,
-        output_dir: Path,
         parse_result: dict,
+        table_names: list[str],
     ) -> None:
         """Append metadata about the parsed demo to a manifest file."""
 
-        manifest_path = self._config.processed_root / "manifest.json"
+        manifest_path = self._layout.manifest_path()
         manifest_entry = {
             "demo_name": demo_path.name,
             "demo_stem": demo_path.stem,
             "source": str(demo_path.resolve()),
-            "output_dir": str(output_dir.resolve()),
+            "output_dir": str(self._layout.demo_dir(demo_path.stem).resolve()),
+            "tables_dir": str(self._layout.tables_dir(demo_path.stem).resolve()),
+            "metadata_file": str(self._layout.metadata_path(demo_path.stem).resolve()),
             "total_rounds": parse_result.get("total_rounds"),
             "parser": "awpy",
-            "tables": [
-                key
-                for key in parse_result.keys()
-                if hasattr(parse_result[key], "to_dict")
-            ],
+            "tables": table_names,
             "processed_at": datetime.now(tz=timezone.utc).isoformat(),
         }
 
