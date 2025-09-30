@@ -16,7 +16,7 @@ This document codifies the architectural principles, technology stack, and devel
 All modules and applications must adhere to the following directory structure. This consistency is critical for tooling, automation, and developer onboarding.
 
 ```
-sales_analyzer/
+cs2_analytics/
 ├──.dockerignore         # Specifies files to ignore in the Docker build
 ├──.git/                 # Git version control directory
 ├──.gitignore            # Specifies files for Git to ignore
@@ -35,7 +35,7 @@ sales_analyzer/
 │   └──...
 │
 ├── src/                  # Main application source code
-│   └── sales_analyzer/
+│   └── cs2_analytics/
 │       ├── __init__.py
 │       ├── agents/       # Modules for AutoGen agents and workflows
 │       │   ├── __init__.py
@@ -61,7 +61,7 @@ Follow these steps precisely to set up your development environment.
 
     ```bash
     git clone <repository_url>
-    cd sales_analyzer
+    cd cs2_analytics
     ```
 
 2.  **Install Poetry:** If you do not have Poetry installed, follow the official instructions at [python-poetry.org](https://python-poetry.org/).
@@ -100,13 +100,13 @@ This library contains tested, reusable prompts and script patterns for common de
 
 | Task Category | Gemini CLI Prompt / Script Pattern | Description & Usage Notes |
 | :--- | :--- | :--- |
-| **Scaffolding** | `echo "Scaffold a new module named '$1' in src/sales_analyzer/..." | gemini` | A shell script (`./scripts/new_module.sh <module_name>`) that creates all necessary files and boilerplate for a new application module, including `__init__.py` and a basic test file. |
-| **Data Analysis** | `gemini -p "Read the file 'src/sales_analyzer/data_processing/analysis.py'. Inside the 'process_data' function, generate Polars code to..."` | Pattern for generating complex Polars data transformation pipelines from natural language descriptions. Be specific about input/output columns. |
+| **Scaffolding** | `echo "Scaffold a new module named '$1' in src/cs2_analytics/..." | gemini` | A shell script (`./scripts/new_module.sh <module_name>`) that creates all necessary files and boilerplate for a new application module, including `__init__.py` and a basic test file. |
+| **Data Analysis** | `gemini -p "Read the file 'src/cs2_analytics/data_processing/analysis.py'. Inside the 'process_data' function, generate Polars code to..."` | Pattern for generating complex Polars data transformation pipelines from natural language descriptions. Be specific about input/output columns. |
 | **UI Generation** | `gemini -p "Generate a Streamlit component in a new function named 'display_revenue_chart'. It should take a Polars DataFrame as input and display..."` | Pattern for creating interactive charts, tables, and input widgets in Streamlit. Specify the exact widget (`st.slider`, `st.multiselect`) and chart type. |
 | **Agent Logic** | `gemini -p "Define an AutoGen AssistantAgent named 'code_writer'. Its system message should be: 'You are an expert Python developer...'. It should not have code execution enabled."` | Pattern for scaffolding the definitions of specialized AutoGen agents. Clearly define the agent's persona and capabilities in the system message. |
 | **Orchestration** | `gemini -p "Create an AutoGen GroupChat and Manager to orchestrate a conversation between the 'user_proxy' and 'data_analyst' agents. The chat should terminate once..."` | Pattern for defining the interaction workflow between multiple AutoGen agents. Specify termination conditions and speaker transition rules. |
-| **Documentation** | `gemini -p "Read the function 'process_data' in 'src/sales_analyzer/data_processing/analysis.py' and generate a comprehensive Google-style docstring for it."` | Automates the creation of high-quality documentation for existing code, improving maintainability. |
-| **Testing** | `gemini -p "Generate a pytest unit test for the function 'calculate_revenue' in 'src/sales_analyzer/data_processing/analysis.py'. Create a mock Polars DataFrame for input and assert the output is correct."` | Accelerates the creation of unit tests for data processing and agent logic. Provide clear examples of input and expected output. |
+| **Documentation** | `gemini -p "Read the function 'process_data' in 'src/cs2_analytics/data_processing/analysis.py' and generate a comprehensive Google-style docstring for it."` | Automates the creation of high-quality documentation for existing code, improving maintainability. |
+| **Testing** | `gemini -p "Generate a pytest unit test for the function 'calculate_revenue' in 'src/cs2_analytics/data_processing/analysis.py'. Create a mock Polars DataFrame for input and assert the output is correct."` | Accelerates the creation of unit tests for data processing and agent logic. Provide clear examples of input and expected output. |
 
 ## 4.6. Deployment Guidelines
 

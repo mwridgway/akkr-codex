@@ -5,12 +5,12 @@ Deliver the metrics and workflows defined in `REQUIREMENTS.md` by building a rep
 
 ## Phase 1 – Data Foundations
 1. **Inventory Inputs:** Catalog available demo files, positional streams, utility events, and map zone annotations. Flag gaps (e.g., missing bombsite polygons) and prioritize acquisition.
-2. **Ingestion Pipeline:** Prototype a Poetry-managed module `src/sales_analyzer/data_io/demos.py` that wraps `awpy` or `demoparser2` to emit normalized event tables (ticks, kills, grenades, player states).
+2. **Ingestion Pipeline:** Prototype a Poetry-managed module `src/cs2_analytics/data_io/demos.py` that wraps `awpy` or `demoparser2` to emit normalized event tables (ticks, kills, grenades, player states).
 3. **Storage Layout:** Define Parquet datasets under `data/processed/` partitioned by match, map, and round. Enable predicate pushdown by standardizing column names and data types.
 4. **Indexing & Metadata:** Implement offset indices and bloom filters where supported; persist dataset manifests (`data/processed/_manifest.json`) to power discovery and incremental loads.
 
 ## Phase 2 – Metric Computation Modules
-1. **Module Skeleton:** Create `src/sales_analyzer/data_processing/metrics/` with submodules per requirement category (pacing.py, aggression.py, rotations.py, utility.py, tactics.py).
+1. **Module Skeleton:** Create `src/cs2_analytics/data_processing/metrics/` with submodules per requirement category (pacing.py, aggression.py, rotations.py, utility.py, tactics.py).
 2. **Pacing Metrics:** Implement pure functions that compute Time to First Kill, Time to Bomb Plant, and Average Death Timestamp using tick granularity. Accept Polars LazyFrames to keep transformations composable.
 3. **Aggression Metrics:** Use map zone annotations to calculate T-Side Average Distance to Bombsite, CT Forward Presence Count, and Player Spacing. Introduce helper for spatial distance caching.
 4. **Rotational Efficiency:** Model rotation triggers and travel times; add a `RotationAnalyzer` class that tracks rotation success and engagement outcomes with configurable thresholds.
@@ -18,7 +18,7 @@ Deliver the metrics and workflows defined in `REQUIREMENTS.md` by building a rep
 6. **Utility Metrics:** Build a utility impact engine that aggregates flash blind time, flash assists, incendiary damage, position denial, and composite scores via configurable weights.
 
 ## Phase 3 – Visualization & Reporting
-1. **Data Access Layer:** Add `src/sales_analyzer/services/metric_service.py` to orchestrate metric pulls and caching.
+1. **Data Access Layer:** Add `src/cs2_analytics/services/metric_service.py` to orchestrate metric pulls and caching.
 2. **Streamlit Views:** Design dashboard sections per metric category, surface trend charts, heatmaps, and tables, and expose filters for map, side, and time windows.
 3. **Coach-Facing Reports:** Generate downloadable CSV/PDF summaries and embed explanatory tooltips describing metric definitions.
 

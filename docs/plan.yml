@@ -1,0 +1,58 @@
+phases:
+  - name: Phase 1 – Data Foundations
+    status: in_progress
+    tasks:
+      - name: Inventory Inputs
+        status: done
+        notes: "Initial demo dataset catalogued in docs/datasets.md."
+      - name: Ingestion Pipeline Skeleton
+        status: in_progress
+        notes: "DemoIngestor bootstrapped with awpy hooks; full parsing TBD."
+      - name: Storage Layout Definition
+        status: todo
+      - name: Indexing & Metadata Strategy
+        status: todo
+  - name: Phase 2 – Metric Computation Modules
+    status: todo
+    tasks:
+      - name: Module Skeleton
+        status: todo
+      - name: Pacing Metrics
+        status: todo
+      - name: Aggression Metrics
+        status: todo
+      - name: Rotational Efficiency
+        status: todo
+      - name: Execute & Retake Metrics
+        status: todo
+      - name: Utility Metrics
+        status: todo
+  - name: Phase 3 – Visualization & Reporting
+    status: todo
+    tasks:
+      - name: Data Access Layer
+        status: todo
+      - name: Streamlit Views
+        status: todo
+      - name: Coach-Facing Reports
+        status: todo
+  - name: Phase 4 – Testing & Validation
+    status: todo
+    tasks:
+      - name: Synthetic Fixtures
+        status: todo
+      - name: Unit Tests
+        status: todo
+      - name: Integration Tests
+        status: todo
+      - name: Coverage & CI Gates
+        status: todo
+  - name: Phase 5 – Automation & Operations
+    status: todo
+    tasks:
+      - name: Automation Scripts
+        status: todo
+      - name: Gemini Prompts
+        status: todo
+      - name: Monitoring Hooks
+        status: todo
