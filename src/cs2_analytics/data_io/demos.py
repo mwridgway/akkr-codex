@@ -52,6 +52,7 @@ class ProcessedLayout:
     tables_dirname: str = "tables"
     metadata_filename: str = "metadata.json"
     manifest_filename: str = "manifest.json"
+    global_manifest_filename: str = "_manifest.json"
 
     def ensure_root(self) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
@@ -74,6 +75,9 @@ class ProcessedLayout:
 
     def manifest_path(self) -> Path:
         return self.root / self.manifest_filename
+
+    def global_manifest_path(self) -> Path:
+        return self.root / self.global_manifest_filename
 
 
 class DemoIngestor:

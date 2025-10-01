@@ -12,7 +12,8 @@ phases:
     status: done
     notes: Processed layout helpers and tests added
   - name: Indexing & Metadata Strategy
-    status: todo
+    status: done
+    notes: DatasetIndexer builds global manifest with offsets and bloom metadata
   notes: Demo discovery, parsing skeleton, storage layout complete
 - name: "Phase 2 \u2013 Metric Computation Modules"
   status: in_progress
@@ -27,7 +28,8 @@ phases:
     status: done
     notes: Implemented distance to site, CT presence, player spacing with tests
   - name: Rotational Efficiency
-    status: todo
+    status: done
+    notes: Rotation metrics module and analyzer implemented with tests
   - name: Execute & Retake Metrics
     status: todo
   - name: Utility Metrics
